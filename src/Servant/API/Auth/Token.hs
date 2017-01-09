@@ -85,8 +85,6 @@ module Servant.API.Auth.Token(
   , authInfoPerm
   , authUpdatePerm
   , authDeletePerm
-  -- * Swagger helpers
-  , authOperations
   ) where
 
 import Control.Lens
@@ -94,16 +92,10 @@ import Data.Aeson.Unit
 import Data.Aeson.WithField
 import Data.Monoid
 import Data.Proxy
-import Data.Swagger (Swagger, Operation)
-import Data.Swagger.Internal (SwaggerType(..), _paramSchemaType)
-import Data.Swagger.Internal.ParamSchema
-import Data.Swagger.Internal.Schema
-import Data.Swagger.Operation
 import GHC.Generics
 import GHC.TypeLits
 import Servant.API
 import Servant.Docs
-import Servant.Swagger
 import Text.RawString.QQ
 
 import Data.Text (Text)
@@ -111,7 +103,6 @@ import qualified Data.Text as T
 
 import Servant.API.Auth.Token.Pagination
 import Servant.API.Auth.Token.Internal.DeriveJson
-import Servant.API.Auth.Token.Internal.Schema
 
 instance ToSample Unit where
   toSamples _ = singleSample Unit
@@ -167,9 +158,6 @@ newtype Token (perms :: [PermSymbol]) = Token { unToken :: Text }
 --
 -- Simplified version that takes plain symbols as permissions.
 type Token' (perms :: [Symbol]) = Token (PlainPerms perms)
-
-instance ToParamSchema (Token perms) where
-  toParamSchema _ = mempty { _paramSchemaType = SwaggerString }
 
 instance FromHttpApiData (Token perms) where
   parseUrlPiece = fmap Token . parseUrlPiece
@@ -234,9 +222,9 @@ data ReqRegister = ReqRegister {
 } deriving (Generic, Show)
 $(deriveJSON (derivePrefix "reqReg") ''ReqRegister)
 
-instance ToSchema ReqRegister where
-  declareNamedSchema = genericDeclareNamedSchema $
-    schemaOptionsDropPrefix "reqReg"
+-- instance ToSchema ReqRegister where
+--   declareNamedSchema = genericDeclareNamedSchema $
+--     schemaOptionsDropPrefix "reqReg"
 
 instance ToSample ReqRegister where
   toSamples _ = singleSample s
@@ -259,9 +247,9 @@ data RespUserInfo = RespUserInfo {
 } deriving (Generic, Show)
 $(deriveJSON (derivePrefix "respUser") ''RespUserInfo)
 
-instance ToSchema RespUserInfo where
-  declareNamedSchema = genericDeclareNamedSchema $
-    schemaOptionsDropPrefix "respUser"
+-- instance ToSchema RespUserInfo where
+--   declareNamedSchema = genericDeclareNamedSchema $
+--     schemaOptionsDropPrefix "respUser"
 
 instance ToSample RespUserInfo where
   toSamples _ = singleSample s
@@ -281,9 +269,9 @@ data RespUsersInfo = RespUsersInfo {
 } deriving (Generic, Show)
 $(deriveJSON (derivePrefix "respUsers") ''RespUsersInfo)
 
-instance ToSchema RespUsersInfo where
-  declareNamedSchema = genericDeclareNamedSchema $
-    schemaOptionsDropPrefix "respUsers"
+-- instance ToSchema RespUsersInfo where
+--   declareNamedSchema = genericDeclareNamedSchema $
+--     schemaOptionsDropPrefix "respUsers"
 
 instance ToSample RespUsersInfo where
   toSamples _ = singleSample s
@@ -307,9 +295,9 @@ data PatchUser = PatchUser {
 } deriving (Generic, Show)
 $(deriveJSON (derivePrefix "patchUser") ''PatchUser)
 
-instance ToSchema PatchUser where
-  declareNamedSchema = genericDeclareNamedSchema $
-    schemaOptionsDropPrefix "patchUser"
+-- instance ToSchema PatchUser where
+--   declareNamedSchema = genericDeclareNamedSchema $
+--     schemaOptionsDropPrefix "patchUser"
 
 instance ToSample PatchUser where
   toSamples _ = samples [s1, s2, s3]
@@ -348,9 +336,9 @@ data UserGroup = UserGroup {
 } deriving (Generic, Show)
 $(deriveJSON (derivePrefix "userGroup") ''UserGroup)
 
-instance ToSchema UserGroup where
-  declareNamedSchema = genericDeclareNamedSchema $
-    schemaOptionsDropPrefix "userGroup"
+-- instance ToSchema UserGroup where
+--   declareNamedSchema = genericDeclareNamedSchema $
+--     schemaOptionsDropPrefix "userGroup"
 
 instance ToSample UserGroup where
   toSamples _ = singleSample s
@@ -373,9 +361,9 @@ data PatchUserGroup = PatchUserGroup {
 } deriving (Generic, Show)
 $(deriveJSON (derivePrefix "patchUserGroup") ''PatchUserGroup)
 
-instance ToSchema PatchUserGroup where
-  declareNamedSchema = genericDeclareNamedSchema $
-    schemaOptionsDropPrefix "patchUserGroup"
+-- instance ToSchema PatchUserGroup where
+--   declareNamedSchema = genericDeclareNamedSchema $
+--     schemaOptionsDropPrefix "patchUserGroup"
 
 instance ToSample PatchUserGroup where
   toSamples _ = samples [s1, s2, s3]
@@ -668,10 +656,6 @@ authUpdatePerm = "auth-update"
 -- | Permission that allows to delete users and cause cascade deletion
 authDeletePerm :: Permission
 authDeletePerm = "auth-delete"
-
--- | Select only operations of the Auth API
-authOperations :: Traversal' Swagger Operation
-authOperations = operationsOf $ toSwagger (Proxy :: Proxy AuthAPI)
 
 -- | "Servant.Docs" documentation of the Auth API
 authDocs :: API
